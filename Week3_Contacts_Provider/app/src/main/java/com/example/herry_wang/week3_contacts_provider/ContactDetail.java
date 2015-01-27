@@ -2,6 +2,7 @@ package com.example.herry_wang.week3_contacts_provider;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -21,6 +22,7 @@ public class ContactDetail extends Activity{
     private static final int EDIT_CONTACT = Menu.FIRST + 1;
     private static final int DELETE_CONTACT = Menu.FIRST + 2;
     public static long id;
+    private String contactId;
     private TextView nameText,phoneNumberText,emailText;
     //private MainActivity aa = new MainActivity();
 
@@ -33,34 +35,46 @@ public class ContactDetail extends Activity{
         id = i.getLongExtra("id",(long)0);
         //temp setting
          nameText = (TextView)findViewById(R.id.name);
-         phoneNumberText = (TextView)findViewById(R.id.phoneNumber);
-         emailText = (TextView)findViewById(R.id.email);
-
-
+        phoneNumberText = (TextView)findViewById(R.id.phoneNumber);
+        emailText = (TextView)findViewById(R.id.email);
 
         populate();
     }
-    @Override
-    public void onResume() {
-        super.onResume();
-        populate();
-    }
+
     public void populate(){
 
-        Log.d("TAg",Integer.toString((int)id));
-        Log.d("TAG",MainActivity.people[(int)id].contactNAME);
-        Log.d("TAG",MainActivity.people[(int)id].contactPHONENUMBER);
-        Log.d("TAG",MainActivity.people[(int)id].contactEMAIL);
-        nameText.setText(MainActivity.people[(int)id].contactNAME);
-        phoneNumberText.setText(MainActivity.people[(int)id].contactPHONENUMBER);
-        emailText.setText(MainActivity.people[(int)id].contactEMAIL);
+        Cursor ContactCursor =  getContentResolver().query(
+                ContactsContract.Contacts.CONTENT_URI,
+                new String[] {ContactsContract.Contacts.DISPLAY_NAME,ContactsContract.Contacts.NAME_RAW_CONTACT_ID
+                },
+                null,
+                null,
+                "_id");
+        int temp=(int)id;
+        while(temp-->=0){
+            ContactCursor.moveToNext();
+        }
+        Log.d("TAG",String.valueOf(id));
+        int idColumn = ContactCursor.getColumnIndex(ContactsContract.Contacts.NAME_RAW_CONTACT_ID);
+        contactId = ContactCursor.getString(idColumn);
+        Log.d("TAG",contactId);
+        int displayNameColumn = ContactCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
+        String disPlayName = ContactCursor.getString(displayNameColumn);
 
-        HashMap<String,String> item = new HashMap<String,String>();
+        Cursor phonesCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,
+                ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID + " = " + contactId, null, null);
+        phonesCursor.moveToFirst();
+        String phoneNumber = phonesCursor.getString(phonesCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA1));
 
-        item.put("contactNameList",MainActivity.people[(int)id].contactNAME);
-        item.put("contactPhoneList",MainActivity.people[(int)id].contactPHONENUMBER);
+        Cursor emailCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI,null,
+                ContactsContract.CommonDataKinds.Email.NAME_RAW_CONTACT_ID+"= " + contactId, null, null);
+        emailCursor.moveToFirst();
+        String email = emailCursor.getString(emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA1));
 
-        MainActivity.myListData.set((int)id,item);
+
+        nameText.setText(disPlayName);
+        phoneNumberText.setText(phoneNumber);
+        emailText.setText(email);
     }
 
 
@@ -85,15 +99,14 @@ public class ContactDetail extends Activity{
                 bundle.putLong("id", id);
                 i.putExtras(bundle);
                 startActivity(i);
-                populate();
                 setResult(RESULT_OK);
                 finish();
                 return true;
 
             case DELETE_CONTACT:
-                getContentResolver().delete( Uri.parse("content://com.android.contacts/data"),"raw_contact_id="+MainActivity.people[(int)id].contactID,null);
-                getContentResolver().delete( Uri.parse("content://com.android.contacts/raw_contacts"),"_id="+MainActivity.people[(int)id].contactID,null);
-                getContentResolver().delete( Uri.parse("content://com.android.contacts/contacts"),"raw_contact_id="+MainActivity.people[(int)id].contactID,null);
+                getContentResolver().delete( Uri.parse("content://com.android.contacts/data"),"raw_contact_id="+contactId,null);
+                getContentResolver().delete( Uri.parse("content://com.android.contacts/raw_contacts"),"_id="+contactId,null);
+                getContentResolver().delete( Uri.parse("content://com.android.contacts/contacts"),"raw_contact_id="+contactId,null);
                 MainActivity.myListData.remove((int)id);
                 setResult(RESULT_OK);
                 finish();

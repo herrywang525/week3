@@ -45,7 +45,7 @@ public class AddContact extends Activity{
                 Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
                 ContentResolver resolver = getContentResolver();
                 ContentValues values = new ContentValues();
-                long contactid = ContentUris.parseId(resolver.insert(uri, values));
+                long contactid = ContentUris.parseId(resolver.insert(uri,values));
 
                 // 添加姓名
                 uri = Uri.parse("content://com.android.contacts/data");
@@ -71,20 +71,6 @@ public class AddContact extends Activity{
                 resolver.insert(uri, values);
                 Log.d("TAG","putDataFinish");
 
-
-                Log.d("TAG","userrrr"+MainActivity.userCount);
-                Log.d("TAG","userrrr"+String.valueOf(contactid));
-                MainActivity.people[MainActivity.userCount] = new MainActivity.person();
-                MainActivity.people[MainActivity.userCount].contactID = String.valueOf(contactid);
-                MainActivity.people[MainActivity.userCount].contactNAME = editName.getText().toString();
-                MainActivity.people[MainActivity.userCount].contactPHONENUMBER = editPhoneNumber.getText().toString();
-                MainActivity.people[MainActivity.userCount].contactEMAIL = editEmail.getText().toString();
-
-                Log.d("TAG",MainActivity.people[MainActivity.userCount].contactID);
-                Log.d("TAG",MainActivity.people[MainActivity.userCount].contactNAME);
-                Log.d("TAG",MainActivity.people[MainActivity.userCount].contactPHONENUMBER);
-                Log.d("TAG",MainActivity.people[MainActivity.userCount].contactEMAIL);
-                MainActivity.userCount++;
                 HashMap<String,String> item = new HashMap<String,String>();
                 item.put("contactNameList",editName.getText().toString());
                 item.put("contactPhoneList",editPhoneNumber.getText().toString());

@@ -20,30 +20,21 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-
-
+import java.util.HashSet;
 
 
 public class MainActivity extends ListActivity {
 
     static ArrayList<HashMap<String,String>> myListData = new ArrayList<HashMap<String,String>>();
-    static class person{
-        public String contactID;
-        public String contactNAME;
-        public String contactPHONENUMBER;
-        public String contactEMAIL;
-    }
 
     private static final int INSERT_CONTACT = Menu.FIRST;
-
-    static int userCount = 0 ;
-    static person people[] = new person[20];
 
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
+        //getContentResolver().delete( Uri.parse("content://com.android.contacts/data"),null,null);
+        //getContentResolver().delete( Uri.parse("content://com.android.contacts/raw_contacts"),null,null);
+       // getContentResolver().delete( Uri.parse("content://com.android.contacts/contacts"),null,null);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getMenu();
@@ -51,8 +42,7 @@ public class MainActivity extends ListActivity {
     }
 
      void getMenu(){
-        userCount = 0;
-         myListData = new ArrayList<HashMap<String,String>>();
+           myListData = new ArrayList<HashMap<String,String>>();
         Cursor ContactCursor =  getContentResolver().query(
                 ContactsContract.Contacts.CONTENT_URI,
                 new String[] {ContactsContract.Contacts.DISPLAY_NAME,
@@ -60,7 +50,7 @@ public class MainActivity extends ListActivity {
                 },
                 null,
                 null,
-                null);
+                "_id");
 
         // // put all data to the arrays
 
@@ -70,14 +60,14 @@ public class MainActivity extends ListActivity {
 
             String contactId = ContactCursor.getString(idColumn);
             String disPlayName = ContactCursor.getString(displayNameColumn);
-
+            Log.d("TAG",contactId);
             // get Phone
             String phoneNumber = "null";
             String email = "null";
 
 
             Cursor phonesCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,
-                    ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID + " = " + contactId, null, null);
+                    ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID + " = " + contactId, null,null);
             if (phonesCursor.moveToFirst()) {
                 phoneNumber = phonesCursor
                         .getString(phonesCursor
@@ -95,18 +85,11 @@ public class MainActivity extends ListActivity {
 
             Log.d("TAG","phone:"+phoneNumber);
 
-            // put the data to the arrays
-            people[userCount] = new person();
-            people[userCount].contactID = contactId;
-            people[userCount].contactNAME = disPlayName;
-            people[userCount].contactPHONENUMBER = phoneNumber;
-            people[userCount].contactEMAIL = email;
-
             HashMap<String,String> item = new HashMap<String,String>();
             item.put("contactNameList",disPlayName);
             item.put("contactPhoneList",phoneNumber);
             myListData.add(item);
-            userCount++;
+
 
         }
 
