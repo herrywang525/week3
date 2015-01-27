@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Week3_Contacts_Provider</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="addContact">Add</string>
+    <string name="editContact">Edit</string>
+    <string name="deleteContact">Delete</string>
+    <string name="nameColumn">User Name</string>
+    <string name="phoneNumberColumn">Phone number</string>
+    <string name="emailColumn">E-mail</string>
+
+</resources>
