@@ -34,7 +34,7 @@ public class MainActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         //getContentResolver().delete( Uri.parse("content://com.android.contacts/data"),null,null);
         //getContentResolver().delete( Uri.parse("content://com.android.contacts/raw_contacts"),null,null);
-       // getContentResolver().delete( Uri.parse("content://com.android.contacts/contacts"),null,null);
+        //getContentResolver().delete( Uri.parse("content://com.android.contacts/contacts"),null,null);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getMenu();
@@ -53,46 +53,47 @@ public class MainActivity extends ListActivity {
                 "_id");
 
         // // put all data to the arrays
+        if(ContactCursor.moveToFirst()) {
+            while (true) {
+                int idColumn = ContactCursor.getColumnIndex(ContactsContract.Contacts.NAME_RAW_CONTACT_ID);
+                int displayNameColumn = ContactCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
 
-        while(ContactCursor.moveToNext()){
-            int idColumn = ContactCursor.getColumnIndex(ContactsContract.Contacts.NAME_RAW_CONTACT_ID);
-            int displayNameColumn = ContactCursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
-
-            String contactId = ContactCursor.getString(idColumn);
-            String disPlayName = ContactCursor.getString(displayNameColumn);
-            Log.d("TAG",contactId);
-            // get Phone
-            String phoneNumber = "null";
-            String email = "null";
+                String contactId = ContactCursor.getString(idColumn);
+                String disPlayName = ContactCursor.getString(displayNameColumn);
+                Log.d("TAG", contactId);
+                // get Phone
+                String phoneNumber = "null";
+                String email = "null";
 
 
-            Cursor phonesCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,null,
-                    ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID + " = " + contactId, null,null);
-            if (phonesCursor.moveToFirst()) {
-                phoneNumber = phonesCursor
-                        .getString(phonesCursor
-                                .getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA1));
+                Cursor phonesCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID + " = " + contactId, null, null);
+                if (phonesCursor.moveToFirst()) {
+                    phoneNumber = phonesCursor
+                            .getString(phonesCursor
+                                    .getColumnIndex(ContactsContract.CommonDataKinds.Phone.DATA1));
+                }
+
+
+                Cursor emailCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI, null,
+                        ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID + " = " + contactId, null, null);
+                if (emailCursor.moveToFirst()) {
+                    email = emailCursor
+                            .getString(emailCursor
+                                    .getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA1));
+                }
+
+                Log.d("TAG", "phone:" + phoneNumber);
+
+                HashMap<String, String> item = new HashMap<String, String>();
+                item.put("contactNameList", disPlayName);
+                item.put("contactPhoneList", phoneNumber);
+                myListData.add(item);
+                if(ContactCursor.moveToNext() == false)
+                    break;
+
             }
-
-
-            Cursor emailCursor = getContentResolver().query(ContactsContract.CommonDataKinds.Email.CONTENT_URI,null,
-                    ContactsContract.CommonDataKinds.Phone.NAME_RAW_CONTACT_ID + " = " + contactId, null, null);
-            if (emailCursor.moveToFirst()) {
-                email = emailCursor
-                        .getString(emailCursor
-                                .getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA1));
-            }
-
-            Log.d("TAG","phone:"+phoneNumber);
-
-            HashMap<String,String> item = new HashMap<String,String>();
-            item.put("contactNameList",disPlayName);
-            item.put("contactPhoneList",phoneNumber);
-            myListData.add(item);
-
-
         }
-
 
         fillData();
 

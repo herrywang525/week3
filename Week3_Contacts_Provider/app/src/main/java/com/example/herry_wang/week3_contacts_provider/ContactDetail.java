@@ -51,7 +51,8 @@ public class ContactDetail extends Activity{
                 null,
                 "_id");
         int temp=(int)id;
-        while(temp-->=0){
+        ContactCursor.moveToFirst();
+        while(temp-->0){
             ContactCursor.moveToNext();
         }
         Log.d("TAG",String.valueOf(id));

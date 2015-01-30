@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.HashMap;
 
@@ -26,16 +27,16 @@ public class EditContact extends Activity{
     private EditText editName,editPhoneNumber,editEmail;
     private String contactId;
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_addcontact);
         setTitle("Edit Contact");
         Intent i = this.getIntent();
-
-        id = i.getLongExtra("id",(long)0);
         Button confirmButton = (Button) findViewById(R.id.confirm);
         Button cancelButton = (Button) findViewById(R.id.cancel);
+        id = i.getLongExtra("id",(long)0);
         editName = (EditText) findViewById(R.id.name);
         editPhoneNumber = (EditText) findViewById(R.id.phoneNumber);
         editEmail = (EditText) findViewById(R.id.email);
@@ -51,47 +52,49 @@ public class EditContact extends Activity{
             }
 
         });
+
         confirmButton.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
+                if("".compareTo(editName.getText().toString().trim())!=0){
+                    Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
+                    ContentResolver resolver = getContentResolver();
+                    ContentValues values = new ContentValues();
+                    long contactid = Long.parseLong(contactId);
 
-                Uri uri = Uri.parse("content://com.android.contacts/raw_contacts");
-                ContentResolver resolver = getContentResolver();
-                ContentValues values = new ContentValues();
-                // content://com.android.contacts/raw_contacts/2
-                long contactid = Long.parseLong(contactId);
+                    // 編輯姓名
+                    uri = Uri.parse("content://com.android.contacts/data");
+                    values.put("data2", editName.getText().toString());
+                    resolver.update(uri, values,"(raw_contact_id="+contactid+") and (mimetype_id"+"="+"8)",null);
 
-                // 編輯姓名
-                uri = Uri.parse("content://com.android.contacts/data");
+                    // 編輯電話
+                    values.clear();
+                    values.put("data1", editPhoneNumber.getText().toString());
+                    resolver.update(uri, values, "(raw_contact_id="+contactid+") and (mimetype_id"+"="+"6)", null);
 
-                values.put("data2", editName.getText().toString());
-                resolver.update(uri, values,"(raw_contact_id="+contactid+") and (mimetype_id"+"="+"8)",null);
+                    // 編輯Email
+                    values.clear();
+                    values.put("data1", editEmail.getText().toString());
+                    resolver.update(uri, values, "(raw_contact_id="+contactid+") and (mimetype_id"+"="+"2)", null);
 
-                // 編輯電話
-                values.clear();
+                    HashMap<String,String> item = new HashMap<String,String>();
 
-                values.put("data1", editPhoneNumber.getText().toString());
-                resolver.update(uri, values, "(raw_contact_id="+contactid+") and (mimetype_id"+"="+"6)", null);
+                    item.put("contactNameList", editName.getText().toString());
+                    item.put("contactPhoneList",editPhoneNumber.getText().toString());
+                    MainActivity.myListData.set((int)id,item);
 
-                // 編輯Email
-                values.clear();
+                    setResult(RESULT_OK);
+                    finish();
+                }
+                else{
+                    Toast.makeText(EditContact.this, "請填入姓名", Toast.LENGTH_LONG).show();
 
-                values.put("data1", editEmail.getText().toString());
-                resolver.update(uri, values, "(raw_contact_id="+contactid+") and (mimetype_id"+"="+"2)", null);
-
-
-                HashMap<String,String> item = new HashMap<String,String>();
-
-                item.put("contactNameList", editName.getText().toString());
-                item.put("contactPhoneList",editPhoneNumber.getText().toString());
-
-                MainActivity.myListData.set((int)id,item);
-
-                setResult(RESULT_OK);
-                finish();
+                }
             }
 
         });
+
+
     }
     public void populate(){
 
@@ -101,9 +104,14 @@ public class EditContact extends Activity{
                 },
                 null,
                 null,
-                null);
-        ContactCursor.moveToPosition((int)id);
-        Log.d("TAG",String.valueOf(id));
+                "_id");
+
+        int temp=(int)id;
+        ContactCursor.moveToFirst();
+        while(temp-->0){
+            ContactCursor.moveToNext();
+        }
+
         int idColumn = ContactCursor.getColumnIndex(ContactsContract.Contacts.NAME_RAW_CONTACT_ID);
         contactId = ContactCursor.getString(idColumn);
         Log.d("TAG",contactId);
